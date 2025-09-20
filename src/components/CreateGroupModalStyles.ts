@@ -37,6 +37,12 @@ export const Input = styled.input`
   border-radius: 4px;
 `;
 
+export const Select = styled.select`
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`;
+
 export const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import {
   AuthContainer,
   FormContainer,
@@ -15,19 +16,42 @@ import {
 } from './AuthStyles';
 
 const Register: React.FC = () => {
-  const [name, setName] = useState('');
+  const [nomeCompleto, setNomeCompleto] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [ra, setRa] = useState('');
+  const [curso, setCurso] = useState('');
+  const [periodo, setPeriodo] = useState('');
+  const [faculdade, setFaculdade] = useState('');
+  const [senha, setSenha] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
+    if (senha !== confirmPassword) {
       alert('As senhas não coincidem!');
       return;
     }
-    // lógica de cadastro aqui com axios
-    console.log('Name:', name, 'Email:', email, 'Password:', password);
+
+    const formData = {
+      nomeCompleto,
+      email,
+      ra,
+      curso,
+      periodo,
+      faculdade,
+      senha
+    };
+
+    try {
+      await api.post('/usuarios/cadastro', formData);
+      alert('Cadastro realizado com sucesso! Você será redirecionado para o login.');
+      navigate('/login');
+    } catch (error: any) {
+      console.error('Erro no cadastro:', error);
+      const errorMessage = error.response?.data?.message || 'Erro desconhecido no cadastro. Tente novamente.';
+      alert(`Falha no cadastro: ${errorMessage}`);
+    }
   };
 
   return (
@@ -41,12 +65,12 @@ const Register: React.FC = () => {
           <Title>Crie sua conta</Title>
           <Subtitle>É rápido e fácil!</Subtitle>
           <InputGroup>
-            <Label htmlFor="name">Nome</Label>
+            <Label htmlFor="name">Nome Completo</Label>
             <Input
               type="text"
               id="name"
-              value={name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+              value={nomeCompleto}
+              onChange={(e) => setNomeCompleto(e.target.value)}
               required
             />
           </InputGroup>
@@ -56,7 +80,47 @@ const Register: React.FC = () => {
               type="email"
               id="email"
               value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </InputGroup>
+          <InputGroup>
+            <Label htmlFor="ra">RA</Label>
+            <Input
+              type="text"
+              id="ra"
+              value={ra}
+              onChange={(e) => setRa(e.target.value)}
+              required
+            />
+          </InputGroup>
+          <InputGroup>
+            <Label htmlFor="curso">Curso</Label>
+            <Input
+              type="text"
+              id="curso"
+              value={curso}
+              onChange={(e) => setCurso(e.target.value)}
+              required
+            />
+          </InputGroup>
+          <InputGroup>
+            <Label htmlFor="periodo">Período</Label>
+            <Input
+              type="text"
+              id="periodo"
+              value={periodo}
+              onChange={(e) => setPeriodo(e.target.value)}
+              required
+            />
+          </InputGroup>
+          <InputGroup>
+            <Label htmlFor="faculdade">Faculdade</Label>
+            <Input
+              type="text"
+              id="faculdade"
+              value={faculdade}
+              onChange={(e) => setFaculdade(e.target.value)}
               required
             />
           </InputGroup>
@@ -65,8 +129,8 @@ const Register: React.FC = () => {
             <Input
               type="password"
               id="password"
-              value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
               required
             />
           </InputGroup>
@@ -76,7 +140,7 @@ const Register: React.FC = () => {
               type="password"
               id="confirmPassword"
               value={confirmPassword}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
           </InputGroup>

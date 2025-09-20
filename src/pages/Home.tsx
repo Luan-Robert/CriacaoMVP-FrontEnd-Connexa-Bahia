@@ -1,10 +1,12 @@
-import React, { useState, useMemo, ChangeEvent } from 'react';
+import React, { useState, useMemo, ChangeEvent, useEffect } from 'react';
 import styled from 'styled-components';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import StudyGroupCard from '../components/StudyGroupCard';
-import CreateGroupModal from '../components/CreateGroupModal';
+import CreateGroupModal, { GroupFormData } from '../components/CreateGroupModal';
+import api from '../services/api';
 
+// [Styled components remain the same]
 const HomeContainer = styled.div`
   padding: 2rem;
 `;
@@ -50,59 +52,50 @@ const Grid = styled.div`
   gap: 1.5rem;
 `;
 
-const initialStudyGroups = [
-  {
-    photo: 'https://i.pinimg.com/originals/60/c1/1a/60c11a93c3b4e522d4794469f457c2d1.jpg',
-    name: 'Turma de React',
-    members: 5,
-    subject: 'React',
-  },
-  {
-    photo: 'https://i.pinimg.com/originals/60/c1/1a/60c11a93c3b4e522d4794469f457c2d1.jpg',
-    name: 'Grupo de Cálculo',
-    members: 3,
-    subject: 'Cálculo I',
-  },
-  {
-    photo: 'https://i.pinimg.com/originals/60/c1/1a/60c11a93c3b4e522d4794469f457c2d1.jpg',
-    name: 'Estudando Física',
-    members: 4,
-    subject: 'Física II',
-  },
-  {
-    photo: 'https://i.pinimg.com/originals/60/c1/1a/60c11a93c3b4e522d4794469f457c2d1.jpg',
-    name: 'Clube do Livro',
-    members: 8,
-    subject: 'Literatura',
-  },
-];
-
 const Home: React.FC = () => {
-  const [studyGroups, setStudyGroups] = useState(initialStudyGroups);
+  const [studyGroups, setStudyGroups] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const fetchGroups = async () => {
+    try {
+      const response = await api.get('/grupos');
+      setStudyGroups(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar grupos:", error);
+      alert("Não foi possível carregar os grupos. Tente novamente mais tarde.");
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
   const subjects = useMemo(() => {
-    const allSubjects = studyGroups.map((group) => group.subject);
+    const allSubjects = studyGroups.map((group) => group.materia);
     return ['', ...Array.from(new Set(allSubjects))];
   }, [studyGroups]);
 
   const filteredGroups = useMemo(() => {
     return studyGroups.filter((group) => {
-      const nameMatch = group.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const subjectMatch = selectedSubject ? group.subject === selectedSubject : true;
+      const nameMatch = group.nome.toLowerCase().includes(searchTerm.toLowerCase());
+      const subjectMatch = selectedSubject ? group.materia === selectedSubject : true;
       return nameMatch && subjectMatch;
     });
   }, [studyGroups, searchTerm, selectedSubject]);
 
-  const handleCreateGroup = (group: { name: string; subject: string }) => {
-    const newGroup = {
-      ...group,
-      photo: 'https://i.pinimg.com/originals/60/c1/1a/60c11a93c3b4e522d4794469f457c2d1.jpg',
-      members: 1,
-    };
-    setStudyGroups([...studyGroups, newGroup]);
+  const handleCreateGroup = async (groupData: GroupFormData) => {
+    try {
+      await api.post('/grupos', groupData);
+      alert('Grupo criado com sucesso!');
+      // Re-fetch groups to show the new one
+      fetchGroups();
+    } catch (error: any) {
+      console.error('Erro ao criar grupo:', error);
+      const errorMessage = error.response?.data?.message || 'Falha ao criar o grupo. Tente novamente.';
+      alert(errorMessage);
+    }
   };
 
   return (
@@ -136,10 +129,10 @@ const Home: React.FC = () => {
           {filteredGroups.map((group, index) => (
             <StudyGroupCard
               key={index}
-              photo={group.photo}
-              name={group.name}
-              members={group.members}
-              subject={group.subject}
+              photo={'https://i.pinimg.com/originals/60/c1/1a/60c11a93c3b4e522d4794469f457c2d1.jpg'} // Placeholder
+              name={group.nome}
+              members={group.total_vagas - group.vagas_disponiveis}
+              subject={group.materia}
             />
           ))}
         </Grid>

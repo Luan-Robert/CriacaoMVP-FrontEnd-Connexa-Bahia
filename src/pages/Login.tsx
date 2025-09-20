@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
 import {
   AuthContainer,
   FormContainer,
@@ -21,13 +22,17 @@ const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui você faria a chamada para o backend com axios
-    // Por enquanto, vamos simular um login bem-sucedido
-    const fakeToken = '12345';
-    login(fakeToken);
-    navigate('/home');
+    try {
+      const response = await api.post('/usuarios/login', { email, senha: password });
+      const { token } = response.data;
+      login(token);
+      navigate('/home');
+    } catch (error) {
+      console.error('Erro no login:', error);
+      alert('Falha no login. Verifique suas credenciais e tente novamente.');
+    }
   };
 
   return (
