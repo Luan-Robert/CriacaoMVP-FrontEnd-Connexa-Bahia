@@ -72,6 +72,7 @@ const Header: React.FC = () => {
           {isAuthenticated ? (
             <>
               <li><Link to="/home">Home</Link></li>
+              <li><Link to="/profile">Perfil</Link></li>
               <li><LogoutButton onClick={handleLogout}>Logout</LogoutButton></li>
             </>
           ) : (

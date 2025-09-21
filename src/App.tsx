@@ -7,6 +7,8 @@ import GroupPage from './pages/GroupPage';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
+import Profile from './pages/Profile';
+
 const App: React.FC = () => {
   return (
     <Router>
@@ -16,7 +18,8 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/group/:groupId" element={<ProtectedRoute><GroupPage /></ProtectedRoute>} />
+          <Route path="/group/:groupId" element={<ProtectedRoute><GroupPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
     </Router>

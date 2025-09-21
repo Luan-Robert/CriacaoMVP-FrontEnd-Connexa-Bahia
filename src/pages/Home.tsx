@@ -1,4 +1,4 @@
-import React, { useState, useMemo, ChangeEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import styled from 'styled-components';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -52,10 +52,17 @@ const Grid = styled.div`
   gap: 1.5rem;
 `;
 
+interface Materia {
+  id: number;
+  nome: string;
+}
+
 const Home: React.FC = () => {
   const [studyGroups, setStudyGroups] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
+  const [selectedLocal, setSelectedLocal] = useState('');
+  const [materias, setMaterias] = useState<Materia[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchGroups = async () => {
@@ -68,28 +75,39 @@ const Home: React.FC = () => {
     }
   };
 
+  const fetchMaterias = async () => {
+    try {
+      const response = await api.get('/materias');
+      setMaterias(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar matérias:", error);
+    }
+  };
+
   useEffect(() => {
     fetchGroups();
+    fetchMaterias();
   }, []);
 
-  const subjects = useMemo(() => {
-    const allSubjects = studyGroups.map((group) => group.materia);
-    return ['', ...Array.from(new Set(allSubjects))];
-  }, [studyGroups]);
+  const handleSearch = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('nome', searchTerm);
+      if (selectedSubject) params.append('materia', selectedSubject);
+      if (selectedLocal) params.append('local', selectedLocal);
 
-  const filteredGroups = useMemo(() => {
-    return studyGroups.filter((group) => {
-      const nameMatch = group.nome.toLowerCase().includes(searchTerm.toLowerCase());
-      const subjectMatch = selectedSubject ? group.materia === selectedSubject : true;
-      return nameMatch && subjectMatch;
-    });
-  }, [studyGroups, searchTerm, selectedSubject]);
+      const response = await api.get(`/grupos/busca?${params.toString()}`);
+      setStudyGroups(response.data.grupos);
+    } catch (error) {
+      console.error("Erro ao buscar grupos:", error);
+      alert("Não foi possível realizar a busca. Tente novamente mais tarde.");
+    }
+  };
 
   const handleCreateGroup = async (groupData: GroupFormData) => {
     try {
       await api.post('/grupos', groupData);
       alert('Grupo criado com sucesso!');
-      // Re-fetch groups to show the new one
       fetchGroups();
     } catch (error: any) {
       console.error('Erro ao criar grupo:', error);
@@ -115,18 +133,25 @@ const Home: React.FC = () => {
             onChange={(e: ChangeEvent<HTMLSelectElement>) => setSelectedSubject(e.target.value)}
           >
             <option value="">Todas as matérias</option>
-            {subjects.map((subject) => (
-              <option key={subject} value={subject}>
-                {subject}
+            {materias.map((materia) => (
+              <option key={materia.id} value={materia.nome}>
+                {materia.nome}
               </option>
             ))}
           </Select>
+          <SearchInput
+            type="text"
+            placeholder="Local..."
+            value={selectedLocal}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setSelectedLocal(e.target.value)}
+          />
+          <button onClick={handleSearch}>Buscar</button>
           <CreateGroupButton onClick={() => setIsModalOpen(true)}>
             Criar Turma
           </CreateGroupButton>
         </FilterContainer>
         <Grid>
-          {filteredGroups.map((group, index) => (
+          {studyGroups.map((group, index) => (
             <StudyGroupCard
               key={index}
               photo={'https://i.pinimg.com/originals/60/c1/1a/60c11a93c3b4e522d4794469f457c2d1.jpg'} // Placeholder
