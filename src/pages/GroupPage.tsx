@@ -209,7 +209,15 @@ const GroupPage: React.FC = () => {
             <h2>Mural de Mensagens</h2>
             <MessageList>
               {messages.map((message, index) => (
-                <MessageItem key={index}>{message.conteudo}</MessageItem>
+                <MessageItem key={index}>
+                  {message.tipo === 'imagem' ? (
+                    <img src={message.anexo_url} alt={message.conteudo} style={{ maxWidth: '200px', borderRadius: '8px' }} />
+                  ) : message.tipo === 'arquivo' ? (
+                    <a href={message.anexo_url} target="_blank" rel="noopener noreferrer">{message.conteudo}</a>
+                  ) : (
+                    message.conteudo
+                  )}
+                </MessageItem>
               ))}
               {messages.length === 0 && <p>Nenhuma mensagem ainda.</p>}
             </MessageList>

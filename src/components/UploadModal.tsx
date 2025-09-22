@@ -43,13 +43,25 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, groupId }) =
     formData.append('anexo', file);
 
     try {
-      await api.post(`/grupos/${groupId}/anexos`, formData, {
+      // 1. Fazer o upload do anexo
+      const uploadResponse = await api.post(`/grupos/${groupId}/anexos`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+
+      const { url, tipo: mimeType } = uploadResponse.data;
+
+      // 2. Criar a mensagem com a URL do anexo
+      await api.post(`/grupos/${groupId}/mensagens`, {
+        texto: file.name, // Usa o nome do arquivo como conteúdo
+        anexo_url: url,
+        tipo: mimeType.startsWith('image/') ? 'imagem' : 'arquivo',
+      });
+
       alert('Arquivo enviado com sucesso!');
-      onClose();
+      onClose(); // O WebSocket cuidará de atualizar a lista de mensagens
+
     } catch (error) {
       console.error("Erro ao enviar arquivo:", error);
       alert('Erro ao enviar arquivo.');

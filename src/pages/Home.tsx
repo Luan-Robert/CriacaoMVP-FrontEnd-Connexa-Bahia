@@ -6,6 +6,8 @@ import StudyGroupCard from '../components/StudyGroupCard';
 import CreateGroupModal, { GroupFormData } from '../components/CreateGroupModal';
 import api from '../services/api';
 
+import PendingInvites from '../components/PendingInvites';
+
 // [Styled components remain the same]
 const HomeContainer = styled.div`
   padding: 2rem;
@@ -147,6 +149,7 @@ const Home: React.FC = () => {
     <>
       <Header />
       <HomeContainer>
+        <PendingInvites />
         <Title>Turmas Disponíveis</Title>
         <FilterContainer>
           <SearchInput
