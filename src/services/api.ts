@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: 'https://api-connexa-bahia-grupo12-dvf4c6avczb3fces.brazilsouth-01.azurewebsites.net/api',
 });
 
 // Adiciona um interceptor de requisição
