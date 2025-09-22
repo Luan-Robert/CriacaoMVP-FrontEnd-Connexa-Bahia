@@ -70,6 +70,7 @@ export type StudyGroup = {
 
 const Home: React.FC = () => {
   const [studyGroups, setStudyGroups] = useState<StudyGroup[]>([]);
+  const [myGroups, setMyGroups] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedLocal, setSelectedLocal] = useState('');
@@ -86,6 +87,16 @@ const Home: React.FC = () => {
     }
   };
 
+  const fetchMyGroups = async () => {
+    try {
+      const response = await api.get('/usuarios/meus-grupos');
+      console.log('Meus grupos (raw):', response.data);
+      setMyGroups(response.data.map((group: any) => group.grupo_id));
+    } catch (error) {
+      console.error("Erro ao buscar meus grupos:", error);
+    }
+  };
+
   const fetchMaterias = async () => {
     try {
       const response = await api.get('/materias');
@@ -98,6 +109,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     fetchGroups();
     fetchMaterias();
+    fetchMyGroups();
   }, []);
 
   const handleSearch = async () => {
@@ -125,6 +137,10 @@ const Home: React.FC = () => {
       const errorMessage = error.response?.data?.message || 'Falha ao criar o grupo. Tente novamente.';
       alert(errorMessage);
     }
+  };
+
+  const handleJoinSuccess = (groupId: number) => {
+    setMyGroups([...myGroups, groupId]);
   };
 
   return (
@@ -162,19 +178,23 @@ const Home: React.FC = () => {
           </CreateGroupButton>
         </FilterContainer>
         <Grid>
-          {studyGroups.map((group, index) => (
-            <StudyGroupCard
-              id={group.id}
-              key={index}
-              photo={'https://i.pinimg.com/originals/60/c1/1a/60c11a93c3b4e522d4794469f457c2d1.jpg'} // Placeholder
-              name={group.nome}
-              members={group.total_vagas - group.vagas_disponiveis}
-              subject={group.materia}
-            />
-          ))}
+          {studyGroups.map((group, index) => {
+            return (
+              <StudyGroupCard
+                id={group.id}
+                key={index}
+                photo={'https://i.pinimg.com/originals/60/c1/1a/60c11a93c3b4e522d4794469f457c2d1.jpg'} // Placeholder
+                name={group.nome}
+                members={group.total_vagas - group.vagas_disponiveis}
+                subject={group.materia}
+                isMember={myGroups.includes(group.id)}
+                onJoinSuccess={handleJoinSuccess}
+              />
+            );
+          })}
         </Grid>
       </HomeContainer>
-      <Footer />
+      {/* <Footer /> */}
       <CreateGroupModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

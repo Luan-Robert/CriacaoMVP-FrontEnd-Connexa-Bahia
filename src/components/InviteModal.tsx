@@ -33,12 +33,21 @@ const InviteModal: React.FC<InviteModalProps> = ({ isOpen, onClose, groupId }) =
 
   const handleInviteByEmail = async () => {
     try {
-      await api.post(`/grupos/${groupId}/convites`, { email });
+      // Primeiro, busca o ID do usuário pelo email
+      const userResponse = await api.get(`/usuarios/email/${email}`);
+      const usuarioIdConvidado = userResponse.data.id;
+
+      // Agora, envia o convite com o ID do usuário
+      await api.post(`/grupos/${groupId}/convites`, { usuarioIdConvidado });
       alert('Convite enviado com sucesso!');
       onClose();
-    } catch (error) {
-      console.error("Erro ao convidar por email:", error);
-      alert('Erro ao convidar por email.');
+    } catch (error: any) {
+      if (error.response && error.response.status === 404) {
+        alert('Usuário não encontrado com este e-mail.');
+      } else {
+        console.error("Erro ao convidar por email:", error);
+        alert('Erro ao convidar por email.');
+      }
     }
   };
 
