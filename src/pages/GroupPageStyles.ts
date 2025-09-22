@@ -25,6 +25,11 @@ export const MessageContainer = styled.div`
 export const MessageList = styled.ul`
   list-style: none;
   padding: 0;
+  height: 400px; /* Fixed height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Hide horizontal scroll */
+  margin-bottom: 1rem; /* Space from the input field */
+  border-radius: 4px;
 `;
 
 export const MessageItem = styled.li`
@@ -33,6 +38,8 @@ export const MessageItem = styled.li`
   padding: 1rem;
   margin-bottom: 1rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  word-wrap: break-word; /* Ensures long words break to the next line */
+  white-space: pre-wrap; /* Preserves whitespace and breaks lines */
 `;
 
 export const MessageForm = styled.form`

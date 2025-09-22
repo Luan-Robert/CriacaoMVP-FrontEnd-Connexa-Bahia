@@ -28,11 +28,22 @@ const Tab = styled.button`
 
 const socket = io('http://localhost:3000'); // Adjust the URL to your backend
 
+type Mensagem = {
+  anexo_url?: string;
+  conteudo?: string;
+  grupo_id?: number;
+  id?: number;
+  usuario_id?: number;
+  tipo?: string;
+  editada?: boolean;
+  data_envio?: string;
+}
+
 const GroupPage: React.FC = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const [group, setGroup] = useState<any>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Mensagem[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [activeTab, setActiveTab] = useState('chat');
   const { user } = useAuth();
@@ -107,6 +118,7 @@ const GroupPage: React.FC = () => {
     if (newMessage.trim()) {
       try {
         await api.post(`/grupos/${groupId}/mensagens`, { texto: newMessage });
+        setMessages((prevMessages) => [...prevMessages, { conteudo: newMessage, usuario_id: user?.id }]);
         setNewMessage('');
       } catch (error) {
         console.error("Erro ao enviar mensagem:", error);
@@ -197,7 +209,7 @@ const GroupPage: React.FC = () => {
             <h2>Mural de Mensagens</h2>
             <MessageList>
               {messages.map((message, index) => (
-                <MessageItem key={index}>{message.texto}</MessageItem>
+                <MessageItem key={index}>{message.conteudo}</MessageItem>
               ))}
               {messages.length === 0 && <p>Nenhuma mensagem ainda.</p>}
             </MessageList>
@@ -276,7 +288,6 @@ const GroupPage: React.FC = () => {
         )}
 
       </GroupPageContainer>
-      <Footer />
       <InviteModal
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}

@@ -57,8 +57,19 @@ interface Materia {
   nome: string;
 }
 
+export type StudyGroup = {
+  id: number;
+  nome: string;
+  materia: string;
+  local: string;
+  objetivo: string;
+  vagas_disponiveis: number;
+  total_vagas: number;
+  data_criacao: string;
+}
+
 const Home: React.FC = () => {
-  const [studyGroups, setStudyGroups] = useState<any[]>([]);
+  const [studyGroups, setStudyGroups] = useState<StudyGroup[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedLocal, setSelectedLocal] = useState('');
@@ -153,6 +164,7 @@ const Home: React.FC = () => {
         <Grid>
           {studyGroups.map((group, index) => (
             <StudyGroupCard
+              id={group.id}
               key={index}
               photo={'https://i.pinimg.com/originals/60/c1/1a/60c11a93c3b4e522d4794469f457c2d1.jpg'} // Placeholder
               name={group.nome}
